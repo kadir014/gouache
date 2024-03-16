@@ -203,6 +203,9 @@ lib.WTGetW.restype = BOOL
 lib.WTGetW.argtypes = [HCTX, BOOL]
 
 
+class WinTabError(Exception): ...
+
+
 def _WTInfo_size(category: int, index: int) -> int:
     return lib.WTInfoW(category, index, None)
 
@@ -224,7 +227,7 @@ def WTInfo(
     size = _WTInfo_size(category, index)
 
     if (size > ctypes.sizeof(output)):
-        raise Exception("Requested information is bigger than the provided output buffer.")
+        raise WinTabError("Requested information is bigger than the provided output buffer.")
     
     lib.WTInfoW(category, index, ctypes.byref(output))
     return output
@@ -292,7 +295,7 @@ class WinTabDevice:
 
         self.context = lib.WTOpenW(hwnd, ctypes.byref(self._context_info), True)
         if not self.context:
-            raise Exception("Couldn't open tablet context.")
+            raise WinTabError("Couldn't open tablet context.")
 
     def close(self):
         """ Close the device context. """
